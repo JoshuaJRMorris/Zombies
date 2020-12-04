@@ -15,6 +15,7 @@ namespace Category
 		SoundEffect				= 1 << 8,
 		Zombie					= 1 << 9,
 		Hero					= 1 << 10,
+		Actor,
 
 		Aircraft = PlayerAircraft | AlliedAircraft | EnemyAircraft,
 		Projectile = AlliedProjectile | EnemyProjectile,

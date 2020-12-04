@@ -1,8 +1,2 @@
-﻿  Actor.cpp
-  Application.cpp
-  DataTables.cpp
-  GameState.cpp
-  Player.cpp
-  World.cpp
-  Generating Code...
+﻿  World.cpp
   SFM_ setup.vcxproj -> C:\Users\jash1\Desktop\SolutionForCppTest\PlaneGame-master\SFM_ setup\Debug\SFM_ setup.exe

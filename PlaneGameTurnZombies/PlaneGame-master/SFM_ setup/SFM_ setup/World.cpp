@@ -214,7 +214,52 @@ void World::handleCollisions()
 
 
 		}
-		
+
+		if (matchesCategories(pair, Category::Zombie, Category::Zombie)) {
+			auto& first = static_cast<Actor&>(*pair.first);
+			auto& second = static_cast<Actor&>(*pair.second);
+
+			if (first.getPosition().x < second.getPosition().x) {
+				first.move(sf::Vector2f(-1.f, 0.f));
+				second.move(sf::Vector2f(1.f, 0.f));
+			}
+			else {
+				first.move(sf::Vector2f(1.f, 0.f));
+				second.move(sf::Vector2f(-1.f, 0.f));
+			}
+
+			if (first.getPosition().y < second.getPosition().y) {
+				first.move(sf::Vector2f(0.f, -1.f));
+				second.move(sf::Vector2f(0.f, 1.f));
+			}
+			else {
+				first.move(sf::Vector2f(0.f, 1.f));
+				second.move(sf::Vector2f(0.f, -1.f));
+			}
+		}
+
+		if (matchesCategories(pair, Category::Zombie, Category::Hero)) {
+			auto& first = static_cast<Actor&>(*pair.first);
+			auto& second = static_cast<Actor&>(*pair.second);
+
+			if (first.getPosition().x < second.getPosition().x) {
+				first.move(sf::Vector2f(-1.f, 0.f));
+				second.move(sf::Vector2f(1.f, 0.f));
+			}
+			else {
+				first.move(sf::Vector2f(1.f, 0.f));
+				second.move(sf::Vector2f(-1.f, 0.f));
+			}
+
+			if (first.getPosition().y < second.getPosition().y) {
+				first.move(sf::Vector2f(0.f, -1.f));
+				second.move(sf::Vector2f(0.f, 1.f));
+			}
+			else {
+				first.move(sf::Vector2f(0.f, 1.f));
+				second.move(sf::Vector2f(0.f, -1.f));
+			}
+		}
 	}
 }
 
