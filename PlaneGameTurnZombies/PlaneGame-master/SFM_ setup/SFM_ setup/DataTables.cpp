@@ -133,7 +133,7 @@ std::map<Actor::Type, ActorData> InitializeActorData()
 
 	data[Actor::Type::Hero2].animations[Actor::State::Attack].addFrameSet(frames.getFramesFor("attack"));
 	data[Actor::Type::Hero2].animations[Actor::State::Attack].setDuration(sf::seconds(1.f));
-	data[Actor::Type::Hero2].animations[Actor::State::Attack].setRepeating(true);
+	data[Actor::Type::Hero2].animations[Actor::State::Attack].setRepeating(false);
 
 	data[Actor::Type::Hero2].animations[Actor::State::Walk].addFrameSet(frames.getFramesFor("walk"));
 	data[Actor::Type::Hero2].animations[Actor::State::Walk].setDuration(sf::seconds(1.f));
