@@ -110,6 +110,11 @@ void Actor::setState(State state)
 	animations_[state_].restart();
 }
 
+Actor::State Actor::getState() const
+{
+	return state_;
+}
+
 int Actor::attackPoints() const
 {
 	if (type_ == Type::Hero2 && state_ == Actor::State::Attack)

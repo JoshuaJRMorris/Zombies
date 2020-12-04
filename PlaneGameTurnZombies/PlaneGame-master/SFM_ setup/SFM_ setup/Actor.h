@@ -35,6 +35,7 @@ public:
 
 	void					attack();
 	void					setState(State state);
+	Actor::State getState() const;
 	int						attackPoints() const;
 
 

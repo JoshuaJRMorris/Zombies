@@ -40,11 +40,12 @@ World::World(sf::RenderTarget& outputTarget, FontHolder& fonts, SoundPlayer& sou
 void World::update(sf::Time dt)
 {
 	// Scroll the world, reset player velocity
-	mWorldView.move(0.f, mScrollSpeed * dt.asSeconds());
+	//mWorldView.move(0.f, mScrollSpeed * dt.asSeconds());
 	mPlayerAircraft->setVelocity(0.f, 0.f);
 
 	// Setup commands to destroy entities, and guide missiles
 	destroyEntitiesOutsideView();
+	adaptNPCPosition();
 	//guideMissiles();
 
 	// Forward commands to scene graph, adapt velocity (scrolling, diagonal correction)
@@ -132,6 +133,36 @@ void World::adaptPlayerPosition()
 	mPlayerAircraft->setPosition(position);
 }
 
+void World::adaptNPCPosition()
+{
+	sf::FloatRect viewBounds(mWorldView.getCenter() - mWorldView.getSize() / 2.f, mWorldView.getSize());
+	const float borderDistance = 40.f;
+
+	Command adaptPosition;
+	adaptPosition.category = Category::Zombie;
+	adaptPosition.action = derivedAction<Actor>([this](Actor& enemy, sf::Time)
+		{
+			/*float left = mWorldView.getCenter().x - mWorldView.getSize().x / 2.f;
+			float right = mWorldView.getCenter().x + mWorldView.getSize().x / 2.f;
+			float top = mWorldView.getCenter().y - mWorldView.getSize().y / 2.f;
+			float bottom = mWorldView.getCenter().y + mWorldView.getSize().y / 2.f;*/
+
+			sf::FloatRect viewBounds(mWorldView.getCenter() - mWorldView.getSize() / 2.f, mWorldView.getSize());
+			const float borderDistance = 40.f;
+
+			sf::Vector2f position = enemy.getPosition();
+
+			position.x = std::max(position.x, viewBounds.left + borderDistance);
+			position.x = std::min(position.x, viewBounds.left + viewBounds.width - borderDistance);
+			position.y = std::max(position.y, viewBounds.top + borderDistance);
+			position.y = std::min(position.y, viewBounds.top + viewBounds.height - borderDistance);
+
+			enemy.setPosition(position);
+		});
+
+	mCommandQueue.push(adaptPosition);
+}
+
 void World::adaptPlayerVelocity()
 {
 	sf::Vector2f velocity = mPlayerAircraft->getVelocity();
@@ -141,7 +172,7 @@ void World::adaptPlayerVelocity()
 		mPlayerAircraft->setVelocity(velocity / std::sqrt(2.f));
 
 	// Add scrolling velocity
-	mPlayerAircraft->accelerate(0.f, mScrollSpeed);
+	
 }
 
 bool matchesCategories(SceneNode::Pair& colliders, Category::Type type1, Category::Type type2)
@@ -170,39 +201,20 @@ void World::handleCollisions()
 	std::set<SceneNode::Pair> collisionPairs;
 	mSceneGraph.checkSceneCollision(mSceneGraph, collisionPairs);
 
-	for (SceneNode::Pair pair : collisionPairs)
+	for (auto pair : collisionPairs)
 	{
-		if (matchesCategories(pair, Category::PlayerAircraft, Category::EnemyAircraft))
-		{
-			auto& player = static_cast<Aircraft&>(*pair.first);
-			auto& enemy = static_cast<Aircraft&>(*pair.second);
+		if (matchesCategories(pair, Category::Hero, Category::Zombie)) {
+			auto& hero = static_cast<Actor&>(*pair.first);
+			auto& zombie = static_cast<Actor&>(*pair.second);
 
-			// Collision: Player damage = enemy's remaining HP
-			player.damage(enemy.getHitpoints());
-			enemy.destroy();
+			if (hero.getState() == Actor::State::Attack)
+				zombie.damage(1);
+			else
+				hero.damage(1);
+
+
 		}
-
-		else if (matchesCategories(pair, Category::PlayerAircraft, Category::Pickup))
-		{
-			auto& player = static_cast<Aircraft&>(*pair.first);
-			auto& pickup = static_cast<Pickup&>(*pair.second);
-
-			// Apply pickup effect to player, destroy projectile
-			/*pickup.apply(player);*/
-			pickup.destroy();
-			//player.playLocalSound(mCommandQueue, SoundEffect::CollectPickup);
-		}
-
-		else if (matchesCategories(pair, Category::EnemyAircraft, Category::AlliedProjectile)
-			|| matchesCategories(pair, Category::PlayerAircraft, Category::EnemyProjectile))
-		{
-			auto& aircraft = static_cast<Aircraft&>(*pair.first);
-			auto& projectile = static_cast<Projectile&>(*pair.second);
-
-			// Apply projectile damage to aircraft, destroy projectile
-			//aircraft.damage(projectile.getDamage());
-			projectile.destroy();
-		}
+		
 	}
 }
 
@@ -272,12 +284,12 @@ void World::buildScene()
 void World::addEnemies()
 {
 	// Add enemies to the spawn point container
-	addEnemy(Actor::Type::Zombie1, 0.f, 500.f);
-	addEnemy(Actor::Type::Zombie2, 0.f, 1000.f);
-	addEnemy(Actor::Type::Zombie4, +100.f, 1150.f);
-	addEnemy(Actor::Type::Zombie3, -100.f, 1150.f);
-	addEnemy(Actor::Type::Zombie5, 70.f, 1500.f);
-	addEnemy(Actor::Type::Zombie1, -70.f, 1500.f);
+	addEnemy(Actor::Type::Zombie1, 0.f, 300.f);
+	addEnemy(Actor::Type::Zombie2, -170.f, 200.f);
+	addEnemy(Actor::Type::Zombie4, +170.f, 200.f);
+	addEnemy(Actor::Type::Zombie3, 0.f, 100.f);
+	addEnemy(Actor::Type::Zombie5, -170.f, 100.f);
+	addEnemy(Actor::Type::Zombie1, 170.f, 100.f);
 
 	//addEnemy(Aircraft::Avenger, -70.f, 1710.f);
 	//addEnemy(Aircraft::Avenger, 70.f, 1700.f);
@@ -323,7 +335,7 @@ void World::spawnEnemies()
 
 		std::unique_ptr<Actor> enemy(new Actor(spawn.type, mTextures, mFonts));
 		enemy->setPosition(spawn.x, spawn.y);
-		enemy->setRotation(180.f);
+		//enemy->setRotation(180.f);
 
 		mSceneLayers[UpperAir]->attachChild(std::move(enemy));
 

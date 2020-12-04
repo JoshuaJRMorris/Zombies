@@ -40,6 +40,7 @@ public:
 private:
 	void								loadTextures();
 	void								adaptPlayerPosition();
+	void								adaptNPCPosition();
 	void								adaptPlayerVelocity();
 	void								handleCollisions();
 	void								updateSounds();
